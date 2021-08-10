@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>repl.it</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <body>
+
+     <form id="form" action="" class ='menu-container'>
+
+    <p> origem:
+         <select id="origem" name = "dropdown">
+            <option value = "011">011</option>
+            <option value = "016">016</option>
+            <option value = "017">017</option>
+            <option value = "018">018</option>
+         </select>
+    </p>
+
+        <p> destino:
+         <select id="destino" name = "dropdown">
+            <option value = "011">011</option>
+            <option value = "016">016</option>
+            <option value = "017">017</option>
+            <option value = "018">018</option>
+         </select> </p>
+
+    <p> Plano:
+      <select id="plano" name = "dropdown">
+        <option value = "FaleMais 30">FaleMais 30</option>
+        <option value = "FaleMais 60">FaleMais 60</option>
+        <option value = "FaleMais 120">FaleMais 120</option>
+      </select> </p>
+
+        <p> tempo:
+         <input id="tempo" type = "text" name = "tempo">
+        </p>
+         <input type = "submit" value = "Calcular">
+
+      </form>
+
+      <br>
+
+      <table class = "table">
+         <tr>
+            <td>ComFaleMais</td>
+            <td><span id="ComFaleMais" class = 'ComFaleMais'></span></td>
+         </tr>
+         
+         <tr>
+            <td>SimFaleMais</td>
+            <td><span id="SimFaleMais" class = 'SimFaleMais'></span></td>
+         </tr>
+      </table>
+
+  <script src="script.js"></script>
+
+  </body>
+</html>

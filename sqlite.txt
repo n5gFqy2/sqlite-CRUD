@@ -1,0 +1,264 @@
+
+- schema Table
+.schema name_table
+
+- schema DB ( Tables Structure )
+.schema
+
+- show Up All Table 
+.tables
+
+.databases
+
+.show
+
+.mode csv
+.import C:/Users/resource/Documents/req/1/4_Tabelas_Salesforce/report1559669110634.csv tab1
+
+.save C:/Users/resource/Documents/req/1/4_Tabelas_Salesforce/mydb.db
+
+.open C:/Users/resource/Documents/req/1/4_Tabelas_Salesforce/mydb.db
+
+---
+---
+
+sqlite3
+.mode csv
+.separator ;
+.import file.csv name_table
+
+---
+---
+
+sqlite3
+.mode csv
+.separator ;
+.import C:\Users\resource\Documents\req\1\Archive\CHATBOT_ABANDONO.CSV abandono_fila
+.import C:\Users\resource\Documents\req\1\Archive\CHATBOT_ATH.CSV HUMANO
+.import C:\Users\resource\Documents\req\1\Archive\CHATBOT_BOT.CSV BOT
+.import C:\Users\resource\Documents\req\1\Archive\CHATBOT_TOTAL.CSV TEST
+
+.import CHATBOT_ABANDONO.CSV abandono_fila
+.import CHATBOT_ATH.CSV HUMANO
+.import CHATBOT_BOT.CSV BOT
+.import CHATBOT_TOTAL.CSV TEST
+
+.import  C:\Users\resource\Documents\req\1\4_Tabelas_Salesforce\report1559669110634.csv test
+
+---
+---
+
+- change type data
+UPDATE MyTable SET MyColumn = CAST(MyColumn AS INTEGER)
+
+---
+---
+
+select "Data/Hora de abertura" from tab3 WHERE "Data/Hora de abertura" < "03/07/2019 10:21" LIMIT 3;
+
+---
+---
+
+BEGIN;
+
+UPDATE TEST
+SET "Data inicio chat bot" = substr( "Data/Hora de fechamento", 0, 11 );
+
+COMMIT;
+
+---------------------------------
+---------------------------------
+
+BEGIN TRANSACTION;
+
+--BEGIN;
+
+CREATE TABLE TEST AS
+SELECT *
+FROM GERAL;
+
+BEGIN TRANSACTION;
+
+ALTER TABLE TEST ADD COLUMN date char(9);
+
+UPDATE TEST 
+--SET "Data inicio chat bot" = "Data/Hora de abertura";
+--SET "Data inicio chat bot" = substr( "Data inicio chat bot", 0, 11 );
+SET date = substr( "Data/Hora de abertura", 7, 4 ) || '-' ||
+        substr( "Data/Hora de abertura", 4, 2 ) || '-' ||
+        substr( "Data/Hora de abertura", 1, 2 );
+
+COMMIT;
+
+---------------------------------------
+---------------------------------------
+
+---
+---
+
+sudo apt-get update
+
+---
+---
+
+WITH temporaryTable(
+                    date,
+                    channel,
+                    global,
+                    call_center,
+                    bot,
+                    abandono_fila
+                    ) AS
+    (
+    
+-- Get all Row - Filter ->    ( call_center = NULL , bot = NULL ,abandono_fila = NULL ) 
+--                        AND ( call_center = 1  AND abandono_fila = 1  )
+SELECT  T."date" AS date,
+        T."Canal de origem" AS channel,
+        T."N£mero do protocolo" AS global,
+        -- call_center
+        CASE (typeof(H."Numero do protocolo")) WHEN 'text' THEN 1 ELSE H."Numero do protocolo" END AS call_center,
+        -- bot
+        CASE (typeof(B."N£mero do protocolo")) WHEN 'text' THEN 1 ELSE B."N£mero do protocolo" END AS bot,
+        -- abandono_fila
+        CASE (typeof(AB."N£mero do protocolo")) WHEN 'text' THEN 1 ELSE AB."N£mero do protocolo" END AS abandono_fila
+FROM TEST T LEFT JOIN BOT B USING ("N£mero do protocolo")
+            LEFT JOIN abandono_fila AB USING ("N£mero do protocolo")
+            LEFT JOIN HUMANO H ON (T."N£mero do protocolo" = H."Numero do protocolo")
+WHERE channel IN ("SMS" , "IB" , "MB" , "WA")
+     AND NOT
+      (H."Numero do protocolo" IS NULL AND
+      B."N£mero do protocolo" IS  NULL AND
+      AB."N£mero do protocolo" IS NULL)
+     AND NOT
+      (typeof(H."Numero do protocolo") = 'text' AND
+      typeof(AB."N£mero do protocolo") = 'text')
+
+-----
+UNION
+-----
+
+-- Get all Row - Filter ->    ( call_center = NULL , bot = NULL ,abandono_fila = NULL ) 
+--                        AND ( call_center = 1  AND abandono_fila = 1  )
+SELECT  T."date_all" AS date,
+        T."Canal de origem" AS channel,
+        T."N£mero do protocolo" AS global,
+        -- call_center
+        CASE (typeof(H."Numero do protocolo")) WHEN 'text' THEN 1 ELSE H."Numero do protocolo" END AS call_center,
+        -- bot
+        CASE (typeof(B."N£mero do protocolo")) WHEN 'text' THEN 1 ELSE B."N£mero do protocolo" END AS bot,
+        -- abandono_fila
+        CASE (typeof(AB."N£mero do protocolo")) WHEN 'text' THEN 1 ELSE AB."N£mero do protocolo" END AS abandono_fila
+FROM TEST T LEFT JOIN BOT B USING ("N£mero do protocolo")
+            LEFT JOIN abandono_fila AB USING ("N£mero do protocolo")
+            LEFT JOIN HUMANO H ON (T."N£mero do protocolo" = H."Numero do protocolo")
+WHERE channel IN ("SMS" , "IB" , "MB" , "WA")
+     AND NOT
+      (H."Numero do protocolo" IS NULL AND
+      B."N£mero do protocolo" IS  NULL AND
+      AB."N£mero do protocolo" IS NULL)
+     AND NOT
+      (typeof(H."Numero do protocolo") = 'text' AND
+      typeof(AB."N£mero do protocolo") = 'text')
+      
+-----
+UNION
+-----
+
+-- GET Row all NULL ( call_center , bot , abandono_fila  )
+SELECT  T."date" AS date,
+        T."Canal de origem" AS channel,
+        T."N£mero do protocolo" AS global,
+        -- call_center
+        NULL AS call_center,
+        -- bot
+        NULL AS bot,
+        -- abandono_fila
+        1 AS abandono_fila
+FROM TEST T LEFT JOIN BOT B USING ("N£mero do protocolo")
+            LEFT JOIN abandono_fila AB USING ("N£mero do protocolo")
+            LEFT JOIN HUMANO H ON (T."N£mero do protocolo" = H."Numero do protocolo")
+WHERE channel IN ("SMS" , "IB" , "MB" , "WA") 
+        AND
+      (H."Numero do protocolo" IS NULL AND
+      B."N£mero do protocolo" IS NULL AND
+      AB."N£mero do protocolo" IS NULL)
+
+-----   
+UNION
+-----
+
+-- GET Row ( call_center = 1 AND abandono_fila = 1 )
+SELECT  T."date" AS date,
+        T."Canal de origem" AS channel,
+        T."N£mero do protocolo" AS global,
+        -- call_center
+        1 AS call_center,
+        -- bot
+        NULL AS bot,
+        -- abandono_fila
+        NULL AS abandono_fila
+FROM TEST T LEFT JOIN BOT B USING ("N£mero do protocolo")
+            LEFT JOIN abandono_fila AB USING ("N£mero do protocolo")
+            LEFT JOIN HUMANO H ON (T."N£mero do protocolo" = H."Numero do protocolo")
+WHERE channel IN ("SMS" , "IB" , "MB" , "WA") AND
+      (typeof(H."Numero do protocolo") = 'text' AND
+      typeof(AB."N£mero do protocolo") = 'text')
+
+
+)
+----------------
+-- MAIN QUERY --
+----------------
+SELECT  date,
+        channel,
+        -- ALL bot
+        SUM( bot ) AS bot,
+        -- ALL call_center
+        SUM( call_center ) AS call_center,
+        -- ALL abandono_fila
+        SUM( abandono_fila ) AS abandono_fila
+FROM temporaryTable
+GROUP BY date , channel
+--ORDER BY datetime( date ) ASC
+
+-----   
+UNION
+-----
+
+---------------
+-- MAIN QUERY --
+----------------
+SELECT  "date_ALL" AS "date",
+        "ALL" AS "channel",
+        -- ALL bot
+        SUM( bot ) AS bot,
+        -- ALL call_center
+        SUM( call_center ) AS call_center,
+        -- ALL abandono_fila
+        SUM( abandono_fila ) AS abandono_fila
+FROM 
+(
+SELECT  T."date" AS "date",
+        T."date_all" AS "date_all",
+        T."Canal de origem" AS channel,
+        T."N£mero do protocolo" AS global,
+        -- call_center
+        CASE (typeof(H."Numero do protocolo")) WHEN 'text' THEN 1 ELSE H."Numero do protocolo" END AS call_center,
+        -- bot
+        CASE (typeof(B."N£mero do protocolo")) WHEN 'text' THEN 1 ELSE B."N£mero do protocolo" END AS bot,
+        -- abandono_fila
+        CASE (typeof(AB."N£mero do protocolo")) WHEN 'text' THEN 1 ELSE AB."N£mero do protocolo" END AS abandono_fila
+FROM TEST T LEFT JOIN BOT B USING ("N£mero do protocolo")
+            LEFT JOIN abandono_fila AB USING ("N£mero do protocolo")
+            LEFT JOIN HUMANO H ON (T."N£mero do protocolo" = H."Numero do protocolo")
+WHERE channel IN ("SMS" , "IB" , "MB" , "WA")
+     AND NOT
+      (H."Numero do protocolo" IS NULL AND
+      B."N£mero do protocolo" IS  NULL AND
+      AB."N£mero do protocolo" IS NULL)
+     AND NOT
+      (typeof(H."Numero do protocolo") = 'text' AND
+      typeof(AB."N£mero do protocolo") = 'text')
+)
+GROUP BY date_all
